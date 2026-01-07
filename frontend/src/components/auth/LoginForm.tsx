@@ -7,7 +7,7 @@ import Alert from '../ui/Alert';
 
 const LoginForm = () => {
   const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('Admin@123');
+  const [password, setPassword] = useState('Admin');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -61,7 +61,7 @@ const LoginForm = () => {
       <div className="text-center text-sm text-gray-400">
         <p>Demo Credentials:</p>
         <p className="text-gray-500 text-xs mt-1">Username: admin</p>
-        <p className="text-gray-500 text-xs">Password: Admin@123</p>
+        <p className="text-gray-500 text-xs">Password: Admin</p>
       </div>
     </form>
   );
