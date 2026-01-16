@@ -1,7 +1,7 @@
 import { DashboardSummary, CICDResponse, MonitoringResponse, InfrastructureResponse } from '../types/dashboard';
 import authService from './auth.service';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8880/api';
+const API_URL = "http://192.168.126.131:8880/api";
 
 class DashboardService {
   private getHeaders() {
