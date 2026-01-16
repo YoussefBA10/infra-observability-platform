@@ -1,6 +1,6 @@
 import { AuthResponse, LoginRequest } from '../types/auth';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = "http://192.168.126.131:8880/api";
 
 class AuthService {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
