@@ -1,12 +1,9 @@
 import { AuthResponse, LoginRequest } from '../types/auth';
-
-const API_URL = "http://192.168.126.131:8880/api";
+import { API_URL } from '../config';
 
 class AuthService {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    if (!API_URL) {
-      throw new Error("VITE_API_URL is not defined");
-    }
+
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: {

@@ -1,7 +1,6 @@
 import { DashboardSummary, CICDResponse, MonitoringResponse, InfrastructureResponse } from '../types/dashboard';
 import authService from './auth.service';
-
-const API_URL = "http://192.168.126.131:8880/api";
+import { API_URL } from '../config';
 
 class DashboardService {
   private getHeaders() {
