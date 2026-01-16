@@ -36,20 +36,25 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .cors(withDefaults())
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+    http
+        .cors(withDefaults())
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+            // open auth endpoints
+            .requestMatchers("/api/auth/**").permitAll()
+            // open actuator endpoints
+            .requestMatchers("/actuator/**").permitAll()
+            // everything else requires authentication
+            .anyRequest().authenticated()
+        )
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        // allow access to H2 console if needed
+        .headers(headers -> headers.frameOptions().sameOrigin());
 
-        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+    return http.build();
+}
 
     @Bean
     public PasswordEncoder passwordEncoder() {
