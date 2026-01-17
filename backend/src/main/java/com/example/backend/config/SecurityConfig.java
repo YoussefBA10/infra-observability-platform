@@ -1,12 +1,10 @@
 package com.example.backend.config;
 
 import com.example.backend.filter.JwtRequestFilter;
-import com.example.backend.service.UserDetailsServiceImpl; // Import this
-import com.example.backend.util.JwtUtil; // Import this
-import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
+import com.example.backend.service.UserDetailsServiceImpl;
+import com.example.backend.util.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,7 +21,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // Inject dependencies required to create the JwtRequestFilter manually
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
 
@@ -32,10 +29,7 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
-    /**
-     * Create the Filter Bean manually here.
-     * Since we removed @Component, Spring won't auto-register it globally.
-     */
+    // 1️⃣ Register Filter Manually (Not Global)
     @Bean
     public JwtRequestFilter jwtRequestFilter() {
         return new JwtRequestFilter(jwtUtil, userDetailsService);
@@ -48,33 +42,19 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    /**
-     * 1️⃣ Actuator Security (Port 9001)
-     */
-    @Bean
-    @Order(1)
-    public SecurityFilterChain actuatorSecurity(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher(EndpointRequest.toAnyEndpoint())
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .csrf(csrf -> csrf.disable())
-                // IMPORTANT: Do NOT add jwtRequestFilter here
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+    // ❌ I REMOVED the 'actuatorSecurity' bean.
+    // Do NOT put it back. Port 9001 will handle itself.
 
-        return http.build();
-    }
-
-    /**
-     * 2️⃣ Application Security (Port 8880)
-     */
+    // 2️⃣ Application Security (Only applied to Port 8880)
     @Bean
-    @Order(2)
     public SecurityFilterChain appSecurity(HttpSecurity http) throws Exception {
         http
                 .cors(withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // Whitelist auth endpoints
                         .requestMatchers("/api/auth/**").permitAll()
+                        // Require auth for everything else on this port
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->
@@ -84,7 +64,7 @@ public class SecurityConfig {
                         headers.frameOptions(frame -> frame.sameOrigin())
                 );
 
-        // Add the Bean we defined above
+        // Add filter ONLY to this chain
         http.addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
