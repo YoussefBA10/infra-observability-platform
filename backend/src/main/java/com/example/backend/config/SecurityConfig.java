@@ -1,6 +1,8 @@
 package com.example.backend.config;
 
 import com.example.backend.filter.JwtRequestFilter;
+import com.example.backend.service.UserDetailsServiceImpl; // Import this
+import com.example.backend.util.JwtUtil; // Import this
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,16 +23,24 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final JwtRequestFilter jwtRequestFilter;
+    // Inject dependencies required to create the JwtRequestFilter manually
+    private final JwtUtil jwtUtil;
+    private final UserDetailsServiceImpl userDetailsService;
 
-    public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
-        this.jwtRequestFilter = jwtRequestFilter;
+    public SecurityConfig(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService) {
+        this.jwtUtil = jwtUtil;
+        this.userDetailsService = userDetailsService;
     }
 
     /**
-     * AuthenticationManager Bean
-     * Used for login/authentication
+     * Create the Filter Bean manually here.
+     * Since we removed @Component, Spring won't auto-register it globally.
      */
+    @Bean
+    public JwtRequestFilter jwtRequestFilter() {
+        return new JwtRequestFilter(jwtUtil, userDetailsService);
+    }
+
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration authenticationConfiguration
@@ -39,10 +49,7 @@ public class SecurityConfig {
     }
 
     /**
-     * 1️⃣ Actuator Security
-     * - Applies to actuator endpoints (port 9001)
-     * - No JWT, no auth
-     * - Prometheus-friendly
+     * 1️⃣ Actuator Security (Port 9001)
      */
     @Bean
     @Order(1)
@@ -50,16 +57,15 @@ public class SecurityConfig {
         http
                 .securityMatcher(EndpointRequest.toAnyEndpoint())
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .csrf(csrf -> csrf.disable());
+                .csrf(csrf -> csrf.disable())
+                // IMPORTANT: Do NOT add jwtRequestFilter here
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }
 
     /**
-     * 2️⃣ Application Security
-     * - Applies to main API (port 8880)
-     * - JWT protected
-     * - Auth endpoints open
+     * 2️⃣ Application Security (Port 8880)
      */
     @Bean
     @Order(2)
@@ -68,28 +74,22 @@ public class SecurityConfig {
                 .cors(withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
-                        // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                // H2 console / iframe support in dev
                 .headers(headers ->
                         headers.frameOptions(frame -> frame.sameOrigin())
                 );
 
-        // Add JWT filter before UsernamePasswordAuthenticationFilter
-        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        // Add the Bean we defined above
+        http.addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    /**
-     * Password encoder for storing user passwords
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
