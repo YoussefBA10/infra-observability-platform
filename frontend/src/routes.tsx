@@ -6,6 +6,7 @@ import DashboardPage from './pages/DashboardPage';
 import CICDPage from './pages/CICDPage';
 import MonitoringPage from './pages/MonitoringPage';
 import InfrastructurePage from './pages/InfrastructurePage';
+import ChatPage from './pages/ChatPage';
 
 const AppRoutes = () => {
   return (
@@ -41,6 +42,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <InfrastructurePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chat"
+          element={
+            <ProtectedRoute>
+              <ChatPage />
             </ProtectedRoute>
           }
         />
