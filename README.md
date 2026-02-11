@@ -1,77 +1,60 @@
-# DevOps Platform
+# Executive DevOps Visibility Platform
 
-This repository contains the source code for a DevOps platform, consisting of a React-based frontend and a Java-based backend.
+A leadership-grade observability platform designed to translate technical infrastructure signals into business-level executive insights. This platform provides a single source of truth for production health, delivery confidence, and operational risk.
 
-## Project Structure
+## 🎯 Executive Value
 
-The repository is organized into two main directories:
+- **Instant Production Visibility**: Real-time health signals across a multi-node cluster.
+- **Infrastructure Command Center**: Visual oversight of containers (CPU, Mem, Uptime) and physical nodes.
+- **Delivery Confidence**: Direct visibility into team delivery pipelines.
+- **Operational Risk Awareness**: Early warning systems for cluster capacity and service stability.
+- **AI-Powered Insights**: Executive-level summaries and recommendations via embedded AI panels.
 
-- `frontend/`: Contains the React application.
-- `backend/`: Contains the Java application.
+## 🏗 Platform Components
 
-### Frontend
+The platform is designed for **Docker Compose** environments, prioritizing stability and clarity over orchestration complexity.
 
-The frontend is a modern web application built with the following technologies:
+- `frontend/`: Executive Dashboard (React, TypeScript, Three.js).
+- `backend/`: Business Intelligence Layer (Spring Boot, Security, JPA).
 
-- **Vite**: A fast build tool for modern web projects.
-- **React**: A JavaScript library for building user interfaces.
-- **TypeScript**: A typed superset of JavaScript that compiles to plain JavaScript.
-- **Tailwind CSS**: A utility-first CSS framework for rapid UI development.
+### Leadership Tech Stack
 
-The frontend code is organized as follows:
+- **Intelligence**: Groq AI (Llama 3.3 70B) for executive reporting and real-time analysis.
+- **Observability**: Prometheus, cAdvisor, and Node Exporter for cluster-wide telemetry.
+- **Security**: JWT-based authentication and secure backend relay.
+- **Core**: Spring Boot 3.3.2 & React 18 with TypeScript.
 
-- `src/components/`: Reusable UI components.
-- `src/pages/`: Top-level page components.
-- `src/routes.tsx`: Application routing configuration.
-- `src/services/`: Modules for interacting with the backend API.
-- `src/context/`: React context for global state management.
-- `src/hooks/`: Custom React hooks.
+## 🛠 Setup & Configuration
 
-### Backend
+### Prerequisites
+- Node.js (v18+)
+- JDK 17
+- MySQL instance
+- Docker & Docker Compose
 
-The backend is a Java application built with Maven. It follows a standard Maven project structure:
+### Configuration
 
-- `src/main/java/`: Contains the main application source code.
-- `src/test/java/`: Contains the test source code.
+#### Intelligence Layer (`backend/.env`)
+```env
+DB_URL=jdbc:mysql://<host>:<port>/devops_db
+JWT_SECRET=<secure-key>
+GROQ_API_KEY=<key>
+PROMETHEUS_URL=http://<host>:9090
+```
 
-## Getting Started
+#### Dashboard Layer (`frontend/.env`)
+```env
+VITE_API_URL=http://localhost:8880/api
+```
 
-To get started with the development, you will need to have Node.js and a Java Development Kit (JDK) installed on your machine.
+## 🐳 Deployment
 
-### Frontend
+The platform is fully containerized using **Docker Compose** for high reliability and simple maintenance.
 
-1. Navigate to the `frontend` directory:
-   ```sh
-   cd frontend
-   ```
+```sh
+docker-compose up -d
+```
 
-2. Install the dependencies:
-   ```sh
-   npm install
-   ```
+## 🤝 Governance & Contributions
 
-3. Start the development server:
-   ```sh
-   npm run dev
-   ```
-
-### Backend
-
-1. Navigate to the `backend` directory:
-   ```sh
-   cd backend
-   ```
-
-2. Build the project using Maven:
-   ```sh
-   ./mvnw clean install
-   ```
-
-3. Run the application:
-   ```sh
-   java -jar target/<your-app-name>.jar
-   ```
-
-## Contributing
-
-Contributions are welcome! Please feel free to open an issue or submit a pull request.
+Guidelines for platform evolution and contributions are managed via pull requests.

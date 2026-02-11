@@ -13,12 +13,21 @@ export interface Message {
     timestamp: Date;
 }
 
+export interface Conversation {
+    id: number;
+    title: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
 /**
  * Request payload for the chat API.
  * Matches the API contract: POST /api/chat
  */
 export interface ChatApiRequest {
     message: string;
+    conversationId?: number;
+    context?: string;
 }
 
 /**
@@ -27,6 +36,7 @@ export interface ChatApiRequest {
  */
 export interface ChatApiResponse {
     reply: string;
+    conversationId?: number;
 }
 
 /**

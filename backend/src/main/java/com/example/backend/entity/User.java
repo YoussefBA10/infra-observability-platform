@@ -12,6 +12,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String username;
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private String password;
 
     public Long getId() {

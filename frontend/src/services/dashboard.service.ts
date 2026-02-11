@@ -25,16 +25,6 @@ class DashboardService {
   }
 
   async getCICDStatus(): Promise<CICDResponse> {
-    // This endpoint does not exist on the local backend, returning mock data
-    return Promise.resolve({
-      pipelines: [],
-      summary: {
-        totalPipelines: 0,
-        successCount: 0,
-        failedCount: 0,
-        runningCount: 0,
-      },
-    });
     const response = await fetch(`${API_URL}/dashboard/cicd`, {
       method: 'GET',
       headers: this.getHeaders(),
@@ -62,18 +52,48 @@ class DashboardService {
     return response.json();
   }
 
-  async getInfrastructure(): Promise<InfrastructureResponse> {
-    // This endpoint does not exist on the local backend, returning mock data
-    return Promise.resolve({ clusters: [], containers: [], nodes: [] });
-    const response = await fetch(`${API_URL}/dashboard/infrastructure`, {
+  async getInfrastructureSummary(): Promise<any> {
+    const response = await fetch(`${API_URL}/infrastructure/summary`, {
       method: 'GET',
       headers: this.getHeaders(),
     });
+    if (!response.ok) throw new Error('Failed to fetch infrastructure summary');
+    return response.json();
+  }
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch infrastructure data');
-    }
+  async getInfrastructureServices(): Promise<any[]> {
+    const response = await fetch(`${API_URL}/infrastructure/services`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch infrastructure services');
+    return response.json();
+  }
 
+  async getInfrastructureContainers(): Promise<any[]> {
+    const response = await fetch(`${API_URL}/infrastructure/containers`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch infrastructure containers');
+    return response.json();
+  }
+
+  async getInfrastructureNodes(): Promise<any[]> {
+    const response = await fetch(`${API_URL}/infrastructure/nodes`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch infrastructure nodes');
+    return response.json();
+  }
+
+  async getInfrastructureRisks(): Promise<string[]> {
+    const response = await fetch(`${API_URL}/infrastructure/risks`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch infrastructure risks');
     return response.json();
   }
 }

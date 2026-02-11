@@ -13,8 +13,13 @@ import ParticleBackground from './ParticleBackground';
 import Alert from '../ui/Alert';
 import { useChatMessages } from '../../hooks/useChatMessages';
 
-const ChatContainer: React.FC = () => {
-    const { messages, isLoading, error, sendMessage, clearError, clearChat } = useChatMessages();
+interface ChatContainerProps {
+    conversationId: number | null;
+    onNewConversation: (id: number) => void;
+}
+
+const ChatContainer: React.FC<ChatContainerProps> = ({ conversationId, onNewConversation }) => {
+    const { messages, isLoading, error, sendMessage, clearError, clearChat } = useChatMessages(conversationId);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -25,13 +30,21 @@ const ChatContainer: React.FC = () => {
         }
     }, [messages, isLoading]);
 
+    const handleSendMessage = async (content: string) => {
+        const newId = await sendMessage(content);
+        // If we were in a new chat (null id) and got an id back, notify parent
+        if (!conversationId && newId) {
+            onNewConversation(newId);
+        }
+    };
+
     return (
-        <div className="relative flex flex-col h-full min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 overflow-hidden">
+        <div className="relative flex flex-col h-full bg-transparent overflow-hidden">
             {/* 3D Particle Background */}
             <ParticleBackground />
 
             {/* Header */}
-            <header className="relative z-10 flex items-center justify-between px-6 py-4 border-b border-gray-800/50 bg-gray-900/50 backdrop-blur-xl">
+            <header className="relative z-10 flex items-center justify-between px-6 py-4 border-b border-gray-800/50 bg-gray-800/40 backdrop-blur-xl">
                 <div className="flex items-center gap-3">
                     <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-500/25">
                         <Terminal className="w-5 h-5 text-white" />
@@ -49,81 +62,56 @@ const ChatContainer: React.FC = () => {
                         className="flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors"
                     >
                         <Trash2 className="w-4 h-4" />
-                        <span className="hidden sm:inline">Clear Chat</span>
+                        <span>Clear</span>
                     </button>
                 )}
             </header>
 
-            {/* Messages Container */}
+            {/* Messages Area */}
             <div
                 ref={messagesContainerRef}
-                className="relative z-10 flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-4"
+                className="relative z-10 flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent"
             >
-                {/* Welcome Message */}
                 {messages.length === 0 && !isLoading && (
-                    <div className="flex flex-col items-center justify-center h-full text-center px-4 animate-fadeIn">
-                        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/20 to-teal-500/20 border border-gray-700/50 flex items-center justify-center mb-6 backdrop-blur-sm">
-                            <MessageCircle className="w-10 h-10 text-blue-400" />
-                        </div>
-                        <h2 className="text-2xl font-bold text-white mb-2">
-                            Welcome to DevOps Assistant
-                        </h2>
-                        <p className="text-gray-400 max-w-md mb-8">
-                            Your AI-powered infrastructure companion. Ask about deployments,
-                            containers, pipelines, monitoring, and more.
-                        </p>
-
-                        {/* Quick Action Chips */}
-                        <div className="flex flex-wrap justify-center gap-2">
-                            {[
-                                '🚀 Deployment status',
-                                '🐳 Docker containers',
-                                '📊 Monitoring health',
-                                '📋 Pipeline status',
-                            ].map((suggestion) => (
-                                <button
-                                    key={suggestion}
-                                    onClick={() => sendMessage(suggestion.replace(/^[^\s]+\s/, ''))}
-                                    className="px-4 py-2 text-sm text-gray-300 bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700/50 rounded-full transition-all hover:scale-105 hover:border-blue-500/50"
-                                >
-                                    {suggestion}
-                                </button>
-                            ))}
-                        </div>
+                    <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+                        <MessageCircle className="w-12 h-12 mb-4 opacity-50" />
+                        <p className="text-lg font-medium">How can I help you today?</p>
+                        <p className="text-sm opacity-75">Ask about your infrastructure, pipelines, or logs.</p>
                     </div>
                 )}
 
-                {/* Message List */}
-                {messages.map((message) => (
-                    <ChatMessage key={message.id} message={message} />
+                {messages.map((msg) => (
+                    <ChatMessage key={msg.id} message={msg} />
                 ))}
 
-                {/* Typing Indicator */}
                 {isLoading && <TypingIndicator />}
 
                 {/* Error Alert */}
                 {error && (
-                    <div className="max-w-lg mx-auto">
+                    <div className="my-4">
                         <Alert
                             type="error"
                             message={error}
                             onClose={clearError}
-                            dismissible
                         />
                     </div>
                 )}
 
-                {/* Scroll anchor */}
                 <div ref={messagesEndRef} />
             </div>
 
             {/* Input Area */}
-            <div className="relative z-10 px-4 sm:px-6 py-4 border-t border-gray-800/50 bg-gray-900/30 backdrop-blur-xl">
-                <div className="max-w-3xl mx-auto">
+            <div className="relative z-10 p-6 border-t border-gray-800/50 bg-gray-800/40 backdrop-blur-xl">
+                <div className="max-w-4xl mx-auto">
                     <ChatInput
-                        onSendMessage={sendMessage}
+                        onSendMessage={handleSendMessage}
                         isLoading={isLoading}
                     />
+                    <div className="flex justify-center mt-2">
+                        <p className="text-xs text-gray-500">
+                            AI can make mistakes. Verify critical DevOps operations.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

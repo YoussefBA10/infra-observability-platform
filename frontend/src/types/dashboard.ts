@@ -1,29 +1,24 @@
 export interface DashboardSummary {
-  ciCdStatus: {
-    [key: string]: {
-      status: 'running' | 'idle' | 'building';
-      lastBuild: string;
-      buildDuration: string;
-    };
+  platformHealth: {
+    productionApp: string;
+    backendApi: string;
+    monitoringStack: string;
+    infrastructure: string;
   };
-  monitoring: {
-    [key: string]: {
-      status: 'up' | 'down';
-      uptime: string;
-      alerts?: number;
-      dashboards?: number;
-    };
+  weeklyKpis: {
+    deploymentSuccessRate: string;
+    incidents: number;
+    mttr: string;
+    availability: string;
   };
-  infrastructure: {
-    [key: string]: {
-      nodes?: number;
-      pods?: number;
-      containers?: number;
-      images?: number;
-      regions?: number;
-      instances?: number;
-      status: 'healthy' | 'warning' | 'critical';
-    };
+  deliveryStatus: {
+    [key: string]: string;
+  };
+  capacity: {
+    activeServices: number;
+    stoppedServices: number;
+    activeContainerNames: string[];
+    status: string;
   };
 }
 

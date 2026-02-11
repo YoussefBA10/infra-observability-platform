@@ -5,27 +5,48 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import com.example.backend.service.InfraService;
 
 @RestController
 @RequestMapping("/api/dashboard")
 public class DashboardController {
 
+    private final InfraService infraService;
+
+    public DashboardController(InfraService infraService) {
+        this.infraService = infraService;
+    }
+
     @GetMapping
     public Map<String, Object> getDashboardSummary() {
         return Map.of(
-                "ciCdStatus", Map.of(
-                        "frontend-app", Map.of("status", "building", "lastBuild", "5 mins ago", "buildDuration", "2m 30s"),
-                        "backend-api", Map.of("status", "idle", "lastBuild", "1 hour ago", "buildDuration", "1m 15s")
+                "platformHealth", Map.of(
+                        "productionApp", infraService.getProductionHealth(),
+                        "backendApi", infraService.getBackendHealth(),
+                        "monitoringStack", "operational",
+                        "infrastructure", infraService.getInfrastructureHealth()
                 ),
-                "monitoring", Map.of(
-                        "prometheus", Map.of("status", "up", "uptime", "99.98%", "alerts", 3),
-                        "grafana", Map.of("status", "up", "uptime", "99.99%", "dashboards", 12)
+                "weeklyKpis", Map.of(
+                        "deploymentSuccessRate", infraService.getDynamicDeliverySuccess(),
+                        "incidents", infraService.getIncidentCount(),
+                        "mttr", "12 mins",
+                        "availability", infraService.getDynamicAvailability()
                 ),
-                "infrastructure", Map.of(
-                        "kubernetes", Map.of("status", "healthy", "nodes", 3, "pods", 50),
-                        "docker", Map.of("status", "healthy", "containers", 25, "images", 120),
-                        "aws", Map.of("status", "warning", "regions", 3, "instances", 15)
+                "deliveryStatus", Map.of(
+                        "frontendService", infraService.getFrontendServiceStatus(),
+                        "backendService", infraService.getBackendServiceStatus()
+                ),
+                "capacity", Map.of(
+                        "activeServices", infraService.getActiveContainerCount(),
+                        "stoppedServices", infraService.getStoppedContainerCount(),
+                        "activeContainerNames", infraService.getActiveContainerNames(),
+                        "status", infraService.getCapacityStatus()
                 )
         );
+    }
+
+    @GetMapping("/cicd")
+    public Map<String, Object> getCICDStatus() {
+        return infraService.getCICDSummary();
     }
 }

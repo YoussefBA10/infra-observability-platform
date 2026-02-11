@@ -4,27 +4,40 @@
  * Provides sendMessage function and manages all chat-related side effects.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Message, ChatState } from '../types/chat';
-import { sendChatMessage } from '../services/chatApi';
-
-/**
- * Generates a unique ID for messages.
- */
-const generateId = (): string => {
-    return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-};
+import { sendChatMessage, getConversationHistory } from '../services/chatApi';
+import { useAuth } from './useAuth';
 
 /**
  * Custom hook for chat message management.
  * Handles sending messages, receiving responses, and error states.
  */
-export function useChatMessages() {
+export function useChatMessages(conversationId: number | null) {
+    const { token } = useAuth();
     const [state, setState] = useState<ChatState>({
         messages: [],
         isLoading: false,
         error: null,
     });
+
+    useEffect(() => {
+        if (conversationId && token) {
+            loadHistory(conversationId);
+        } else {
+            setState(prev => ({ ...prev, messages: [], error: null }));
+        }
+    }, [conversationId, token]);
+
+    const loadHistory = async (id: number) => {
+        setState(prev => ({ ...prev, isLoading: true }));
+        try {
+            const history = await getConversationHistory(token!, id);
+            setState(prev => ({ ...prev, messages: history, isLoading: false }));
+        } catch (error) {
+            setState(prev => ({ ...prev, error: 'Failed to load history', isLoading: false }));
+        }
+    };
 
     /**
      * Sends a user message and gets the bot response.
@@ -33,7 +46,7 @@ export function useChatMessages() {
     const sendMessage = useCallback(async (content: string) => {
         // Create user message
         const userMessage: Message = {
-            id: generateId(),
+            id: Date.now().toString(),
             content,
             sender: 'user',
             timestamp: new Date(),
@@ -48,64 +61,52 @@ export function useChatMessages() {
         }));
 
         try {
-            // Call the chat API
-            const response = await sendChatMessage({ message: content });
+            // Get current page context
+            const context = window.location.pathname;
 
-            // Create bot response message
+            // Call the chat API with the auth token and context
+            const response = await sendChatMessage(content, token || '', conversationId || undefined, context);
+
+            // Create bot message from response
             const botMessage: Message = {
-                id: generateId(),
+                id: (Date.now() + 1).toString(),
                 content: response.reply,
                 sender: 'bot',
                 timestamp: new Date(),
             };
 
-            // Add bot message and clear loading state
+            // Add bot response and clear loading
             setState((prev) => ({
                 ...prev,
                 messages: [...prev.messages, botMessage],
                 isLoading: false,
             }));
-        } catch (error) {
-            // Handle API errors
-            const errorMessage = error instanceof Error
-                ? error.message
-                : 'An unexpected error occurred. Please try again.';
 
+            return response.conversationId;
+        } catch (error: any) {
+            // Handle error and reset loading
             setState((prev) => ({
                 ...prev,
                 isLoading: false,
-                error: errorMessage,
+                error: error.message || 'Failed to send message',
             }));
+            throw error;
         }
-    }, []);
+    }, [token, conversationId]);
 
-    /**
-     * Clears the error state.
-     */
-    const clearError = useCallback(() => {
-        setState((prev) => ({
-            ...prev,
-            error: null,
-        }));
-    }, []);
-
-    /**
-     * Clears all messages and resets the chat.
-     */
     const clearChat = useCallback(() => {
-        setState({
-            messages: [],
-            isLoading: false,
-            error: null,
-        });
+        setState((prev) => ({ ...prev, messages: [], error: null }));
+    }, []);
+
+    const clearError = useCallback(() => {
+        setState((prev) => ({ ...prev, error: null }));
     }, []);
 
     return {
-        messages: state.messages,
-        isLoading: state.isLoading,
-        error: state.error,
+        ...state,
         sendMessage,
         clearError,
         clearChat,
+        // No explicit refresh needed as useEffect handles it
     };
 }

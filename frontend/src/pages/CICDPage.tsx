@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 import StatCard from '../components/dashboard/StatCard';
 import StatusBadge from '../components/dashboard/StatusBadge';
 import Loader from '../components/ui/Loader';
 import Alert from '../components/ui/Alert';
+import ChatWidget from '../components/chat/ChatWidget';
 import dashboardService from '../services/dashboard.service';
 import { CICDResponse } from '../types/dashboard';
 
@@ -52,8 +53,8 @@ const CICDPage = () => {
         )}
 
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">CI/CD Pipeline</h1>
-          <p className="text-gray-400">Continuous integration and deployment status</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Delivery Insights</h1>
+          <p className="text-gray-400">Executive CI/CD Pipeline Intelligence</p>
         </div>
 
         {data && (
@@ -104,18 +105,15 @@ const CICDPage = () => {
                         <span className="text-white font-medium">{pipeline.successRate}</span>
                       </div>
                     </div>
-
-                    <div className="mt-4 pt-4 border-t border-gray-700">
-                      <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
-                        View Details
-                      </button>
-                    </div>
                   </div>
                 ))}
               </div>
             </div>
           </>
         )}
+
+        {/* Floating AI Delivery Agent */}
+        <ChatWidget />
       </div>
     </Layout>
   );

@@ -1,17 +1,17 @@
-import React from 'react';
 import { LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../ui/Button';
 
 interface HeaderProps {
+  sidebarOpen: boolean;
   onMenuClick?: () => void;
 }
 
-const Header = ({ onMenuClick }: HeaderProps) => {
+const Header = ({ sidebarOpen, onMenuClick }: HeaderProps) => {
   const { user, logout } = useAuth();
 
   return (
-    <header className="bg-gray-900 border-b border-gray-800">
+    <header className={`bg-gray-900 border-b border-gray-800 transition-all duration-300 ${sidebarOpen ? 'md:pl-64' : 'md:pl-0'}`}>
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-4">
           {onMenuClick && (
