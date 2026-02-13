@@ -68,9 +68,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /**
-     * 2️⃣ Application Security (Port 8880)
-     */
     @Bean
     @Order(2)
     public SecurityFilterChain appSecurity(HttpSecurity http) throws Exception {
@@ -82,7 +79,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/reports/**").permitAll()
                         .requestMatchers("/api/ai/**").permitAll()
                         .requestMatchers("/api/infrastructure/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/**").authenticated() // Explicitly require auth for all other API endpoints
+                        .anyRequest().permitAll() // Allow static assets etc if served by backend
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -102,7 +100,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "authorization", "Content-Type", "content-type", "x-auth-token"));
         configuration.setExposedHeaders(Collections.singletonList("x-auth-token"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

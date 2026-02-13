@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+import api from './api';
 
 export interface AiAnalysisResponse {
     summary: string;
@@ -9,8 +7,8 @@ export interface AiAnalysisResponse {
 
 export const aiService = {
     analyzePage: async (page: string, pipelineId: number, data: any) => {
-        const response = await axios.post<AiAnalysisResponse>(
-            `${API_URL}/ai/analyze`,
+        const response = await api.post<AiAnalysisResponse>(
+            '/ai/analyze',
             { page, pipelineId, data },
             { timeout: 3000 }
         );

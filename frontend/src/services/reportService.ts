@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+import api from './api';
 
 export interface SonarReport {
     id: number;
@@ -40,25 +38,25 @@ export interface Pipeline {
 
 export const reportService = {
     getLatestReport: async (component?: string) => {
-        const response = await axios.get<Pipeline>(`${API_URL}/reports/latest`, {
+        const response = await api.get<Pipeline>('/reports/latest', {
             params: { component }
         });
         return response.data;
     },
     getSonarReport: async (id: number) => {
-        const response = await axios.get<SonarReport>(`${API_URL}/reports/${id}/sonar`);
+        const response = await api.get<SonarReport>(`/reports/${id}/sonar`);
         return response.data;
     },
     getTrivyFindings: async (id: number) => {
-        const response = await axios.get<TrivyFinding[]>(`${API_URL}/reports/${id}/trivy`);
+        const response = await api.get<TrivyFinding[]>(`/reports/${id}/trivy`);
         return response.data;
     },
     getOwaspFindings: async (id: number) => {
-        const response = await axios.get<OwaspFinding[]>(`${API_URL}/reports/${id}/owasp`);
+        const response = await api.get<OwaspFinding[]>(`/reports/${id}/owasp`);
         return response.data;
     },
     getHistory: async (component?: string) => {
-        const response = await axios.get<Pipeline[]>(`${API_URL}/reports/history`, {
+        const response = await api.get<Pipeline[]>('/reports/history', {
             params: { component }
         });
         return response.data;
