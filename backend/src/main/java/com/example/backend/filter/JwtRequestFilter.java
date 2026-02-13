@@ -12,12 +12,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
 import java.io.IOException;
 
-// ❌ STOP: Do NOT add @Component here.
+// ❌ STOP: Do NOT add @Component here. 
 // If you leave @Component, this filter runs on Port 9001 and crashes it.
 public class JwtRequestFilter extends OncePerRequestFilter {
 
@@ -44,12 +41,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Skip filter for preflight requests
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -58,16 +49,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
 
         String jwt = authHeader.substring(7);
-        String username = null;
-        try {
-            username = jwtUtil.extractUsername(jwt);
-        } catch (ExpiredJwtException e) {
-            logger.warn("JWT token is expired: " + e.getMessage());
-        } catch (SignatureException | MalformedJwtException e) {
-            logger.warn("Invalid JWT token: " + e.getMessage());
-        } catch (Exception e) {
-            logger.error("Could not extract username from JWT", e);
-        }
+        // ... rest of your existing logic ...
+        String username = jwtUtil.extractUsername(jwt);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
