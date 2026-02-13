@@ -27,8 +27,12 @@ public class JwtUtil {
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
+        // Safe-guard: If expiration is less than 30 seconds (likely set in seconds instead of ms),
+        // default to 24 hours (86400000 ms)
+        long validDuration = expiration < 30000 ? 86400000 : expiration;
+        
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setExpiration(new Date(System.currentTimeMillis() + validDuration))
                 .signWith(SignatureAlgorithm.HS256, secret).compact();
     }
 

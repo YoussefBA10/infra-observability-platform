@@ -4,42 +4,22 @@
  */
 
 import { ChatApiRequest, ChatApiResponse, Conversation, Message } from '../types/chat';
-import { API_URL } from '../config';
+import api from './api';
 
 const USE_MOCK_API = false;
 
-export const getConversations = async (token: string): Promise<Conversation[]> => {
+export const getConversations = async (_token?: string): Promise<Conversation[]> => {
     if (USE_MOCK_API) return []; // Mock not implemented for this
 
-    const response = await fetch(`${API_URL}/chat/conversations`, {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to fetch conversations');
-    }
-
-    return response.json();
+    const response = await api.get('/chat/conversations');
+    return response.data;
 };
 
-export const getConversationHistory = async (token: string, conversationId: number): Promise<Message[]> => {
+export const getConversationHistory = async (_token: string, conversationId: number): Promise<Message[]> => {
     if (USE_MOCK_API) return [];
 
-    const response = await fetch(`${API_URL}/chat/conversations/${conversationId}`, {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to fetch conversation history');
-    }
-
-    const data = await response.json();
+    const response = await api.get(`/chat/conversations/${conversationId}`);
+    const data = response.data;
     // Map backend history to frontend Message type
     // Backend returns [{role: "user", content: "..."}]
     return data.map((msg: any, index: number) => ({
@@ -52,7 +32,7 @@ export const getConversationHistory = async (token: string, conversationId: numb
 
 export const sendChatMessage = async (
     content: string,
-    token: string,
+    _token: string,
     conversationId?: number,
     context?: string
 ): Promise<ChatApiResponse> => {
@@ -73,19 +53,6 @@ export const sendChatMessage = async (
         context
     };
 
-    const response = await fetch(`${API_URL}/chat`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to send message');
-    }
-
-    return response.json();
+    const response = await api.post('/chat', payload);
+    return response.data;
 };

@@ -1,23 +1,18 @@
 import { AuthResponse, LoginRequest } from '../types/auth';
-import { API_URL } from '../config';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 class AuthService {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
 
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
+    const response = await axios.post(`${API_URL}/auth/login`, credentials, {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(credentials),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Login failed');
-    }
-
-    const data = await response.json();
+    const data = response.data;
     localStorage.setItem('access_token', data.access_token);
     localStorage.setItem('refresh_token', data.refresh_token);
     localStorage.setItem('user', JSON.stringify(data.user));
@@ -36,7 +31,7 @@ class AuthService {
     // No backend endpoint for refresh token, just return the existing one or throw error
     const token = this.getAccessToken();
     if (token) {
-        return Promise.resolve(token);
+      return Promise.resolve(token);
     }
     throw new Error('No token available to refresh');
   }
