@@ -121,7 +121,7 @@ const Security = () => {
                         <h3 className="text-xl font-bold text-white">Vulnerability Profile</h3>
                     </div>
                     <div className="h-[250px]">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
                             <BarChart data={trivyStats} layout="vertical" margin={{ left: -20, right: 20 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" horizontal={false} />
                                 <XAxis type="number" hide />

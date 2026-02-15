@@ -135,7 +135,7 @@ const CodeQuality = () => {
                         <div className="bg-slate-800/40 p-8 rounded-3xl border border-slate-700">
                             <h3 className="text-xl font-bold text-white mb-6">Issue Distribution</h3>
                             <div className="h-[300px]">
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
                                     <PieChart>
                                         <Pie
                                             data={pieData}
@@ -161,7 +161,7 @@ const CodeQuality = () => {
                         <div className="bg-slate-800/40 p-8 rounded-3xl border border-slate-700">
                             <h3 className="text-xl font-bold text-white mb-6">Health Indicators (%)</h3>
                             <div className="h-[300px]">
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
                                     <BarChart data={barData}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                                         <XAxis dataKey="name" stroke="#94a3b8" />

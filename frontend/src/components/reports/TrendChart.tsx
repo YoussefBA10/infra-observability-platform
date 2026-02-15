@@ -28,7 +28,7 @@ const TrendChart: React.FC<TrendChartProps> = ({
 }) => {
     return (
         <div className="w-full" style={{ height }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
                 {type === 'line' ? (
                     <LineChart data={data}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />

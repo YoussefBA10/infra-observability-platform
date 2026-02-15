@@ -54,7 +54,7 @@ public class ReportController {
     public ResponseEntity<Pipeline> getLatestReport(@RequestParam(required = false) String component) {
         return reportService.getLatestReport(component)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.ok().body(null));
     }
 
     @GetMapping("/{id}/sonar")
