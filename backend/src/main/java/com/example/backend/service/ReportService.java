@@ -60,16 +60,27 @@ public class ReportService {
 
     private void saveSonarData(Pipeline pipeline, JsonNode sonarData) {
         SonarReport report = new SonarReport();
-        JsonNode measures = sonarData.path("component").path("measures");
-        for (JsonNode measure : measures) {
-            String metric = measure.path("metric").asText();
-            String val = measure.path("value").asText();
-            switch (metric) {
-                case "bugs": report.setBugs(Integer.parseInt(val)); break;
-                case "vulnerabilities": report.setVulnerabilities(Integer.parseInt(val)); break;
-                case "code_smells": report.setCodeSmells(Integer.parseInt(val)); break;
-                // case "coverage": report.setCoverage(Double.parseDouble(val)); break; // Removed coverage
-                case "duplicated_lines_density": report.setDuplication(Double.parseDouble(val)); break;
+        JsonNode measures = sonarData.path("measures");
+        if (measures.isMissingNode() || measures.isEmpty()) {
+            measures = sonarData.path("component").path("measures");
+        }
+
+        if (!measures.isMissingNode()) {
+            for (JsonNode measure : measures) {
+                String metric = measure.path("metric").asText();
+                String val = measure.path("value").asText();
+                if (val == null || val.isEmpty()) continue;
+                
+                try {
+                    switch (metric) {
+                        case "bugs": report.setBugs(Integer.parseInt(val)); break;
+                        case "vulnerabilities": report.setVulnerabilities(Integer.parseInt(val)); break;
+                        case "code_smells": report.setCodeSmells(Integer.parseInt(val)); break;
+                        case "duplicated_lines_density": report.setDuplication(Double.parseDouble(val)); break;
+                    }
+                } catch (NumberFormatException e) {
+                    // Log or handle parsing error for specific metric
+                }
             }
         }
         report.setPipeline(pipeline);

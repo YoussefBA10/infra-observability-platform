@@ -1,0 +1,22 @@
+{
+    "component": {
+        "measures": [
+            {
+                "metric": "bugs",
+                "value": "12"
+            },
+            {
+                "metric": "vulnerabilities",
+                "value": "5"
+            },
+            {
+                "metric": "code_smells",
+                "value": "45"
+            },
+            {
+                "metric": "duplicated_lines_density",
+                "value": "3.5"
+            }
+        ]
+    }
+}

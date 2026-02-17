@@ -31,9 +31,16 @@ When operating on delivery pipelines, the agent pivots to a **Delivery-First** p
 ### 3. Integrated AI Insight Panel
 The portal features embedded AI analysis on every critical page:
 - **Automatic Synthesis**: One-click analysis of pipeline health, code quality, and security findings.
-- **Contextual Reasoning**: Groq-powered logical bridging of technical debt and delivery risk.
+- **Deep-Dive Reasoning**: Groq-powered logical bridging of technical debt and delivery risk, analyzing individual findings (CVEs, bugs, code smells).
+- **Persistent Evidence**: All AI analyses are stored and linked to specific pipeline runs for historical auditing.
 
-### 4. Pure Docker Reliability
+### 4. Persistent Conversational Memory
+The DevOps Assistant now features full state persistence:
+- **Chat History Sidebar**: Quickly access, rename, or resume previous conversations with the "ChatGPT-style" navigation.
+- **Contextual Recall**: The assistant maintains memory of previous messages within a conversation to provide coherent multi-step troubleshooting.
+- **User-Specific Storage**: Conversations are securely associated with the user profile in the database.
+
+### 5. Pure Docker Reliability
 Designed specifically for Docker Compose environments, the agent monitors multi-host container clusters without orchestration overhead.
 
 ## 🌌 Modern Oversight Interface
