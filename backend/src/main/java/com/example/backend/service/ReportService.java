@@ -13,10 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 
 @Service
 public class ReportService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ReportService.class);
 
     @Autowired
     private PipelineRepository pipelineRepository;
@@ -59,32 +63,90 @@ public class ReportService {
     }
 
     private void saveSonarData(Pipeline pipeline, JsonNode sonarData) {
+        logger.info("Deep parsing SonarQube data: {}", sonarData.toString());
         SonarReport report = new SonarReport();
+        
+        // 1. Check if this is an Issues Search Report (list of issues)
+        JsonNode issues = sonarData.path("issues");
+        if (issues.isArray() && !issues.isEmpty()) {
+            logger.info("Detected SonarQube Issues Search report with {} issues", issues.size());
+            int bugs = 0;
+            int vulnerabilities = 0;
+            int codeSmells = 0;
+            
+            for (JsonNode issue : issues) {
+                String type = issue.path("type").asText();
+                if ("BUG".equalsIgnoreCase(type)) bugs++;
+                else if ("VULNERABILITY".equalsIgnoreCase(type)) vulnerabilities++;
+                else if ("CODE_SMELL".equalsIgnoreCase(type)) codeSmells++;
+            }
+            report.setBugs(bugs);
+            report.setVulnerabilities(vulnerabilities);
+            report.setCodeSmells(codeSmells);
+            
+            // Note: Issues reports usually don't contain duplication %, 
+            // but we'll try to find it via recursive search just in case
+        }
+
+        // 2. Try to find measures in standard arrays (root or component)
         JsonNode measures = sonarData.path("measures");
-        if (measures.isMissingNode() || measures.isEmpty()) {
+        if (measures.isMissingNode() || !measures.isArray()) {
             measures = sonarData.path("component").path("measures");
         }
 
-        if (!measures.isMissingNode()) {
-            for (JsonNode measure : measures) {
-                String metric = measure.path("metric").asText();
-                String val = measure.path("value").asText();
-                if (val == null || val.isEmpty()) continue;
-                
-                try {
-                    switch (metric) {
-                        case "bugs": report.setBugs(Integer.parseInt(val)); break;
-                        case "vulnerabilities": report.setVulnerabilities(Integer.parseInt(val)); break;
-                        case "code_smells": report.setCodeSmells(Integer.parseInt(val)); break;
-                        case "duplicated_lines_density": report.setDuplication(Double.parseDouble(val)); break;
-                    }
-                } catch (NumberFormatException e) {
-                    // Log or handle parsing error for specific metric
-                }
+        if (measures.isArray()) {
+            logger.info("Found measures array with {} items", measures.size());
+            for (JsonNode m : measures) {
+                String key = m.path("metric").asText().toLowerCase();
+                String val = m.path("value").asText();
+                applyMetric(report, key, val);
             }
-        }
+        } 
+        
+        // 3. Fallback: Recursive search for any lingering metrics
+        parseRecursively(sonarData, report);
+
         report.setPipeline(pipeline);
         pipeline.setSonarReport(report);
+        logger.info("Final aggregated report: Bugs={}, CodeSmells={}, Vuls={}, Duplication={}", 
+                report.getBugs(), report.getCodeSmells(), report.getVulnerabilities(), report.getDuplication());
+    }
+
+    private void parseRecursively(JsonNode node, SonarReport report) {
+        if (node.isObject()) {
+            node.fields().forEachRemaining(entry -> {
+                String key = entry.getKey().toLowerCase();
+                if (entry.getValue().isValueNode()) {
+                    applyMetric(report, key, entry.getValue().asText());
+                } else {
+                    parseRecursively(entry.getValue(), report);
+                }
+            });
+        } else if (node.isArray()) {
+            for (JsonNode item : node) {
+                parseRecursively(item, report);
+            }
+        }
+    }
+
+    private void applyMetric(SonarReport report, String key, String val) {
+        if (val == null || val.isEmpty() || val.equals("null")) return;
+        
+        try {
+            if (key.contains("bug")) {
+                if (report.getBugs() == null) report.setBugs((int) Double.parseDouble(val));
+            } else if (key.contains("vulnerabilit")) {
+                if (report.getVulnerabilities() == null) report.setVulnerabilities((int) Double.parseDouble(val));
+            } else if (key.contains("code_smell") || key.contains("smell")) {
+                if (report.getCodeSmells() == null) report.setCodeSmells((int) Double.parseDouble(val));
+            } else if (key.contains("duplication") || key.contains("duplicated_lines")) {
+                if (report.getDuplication() == null) report.setDuplication(Double.parseDouble(val));
+            } else if (key.contains("coverage")) {
+                if (report.getCoverage() == null) report.setCoverage(Double.parseDouble(val));
+            }
+        } catch (Exception e) {
+            logger.debug("Could not parse value '{}' for key '{}'", val, key);
+        }
     }
 
     private void saveTrivyData(Pipeline pipeline, JsonNode trivyData) {

@@ -1,0 +1,1 @@
+{"id":9,"timestamp":"2026-02-17T20:59:47.785565","status":"SUCCESS","duration":12345,"commitHash":"abc123","component":"backend","appVersion":"999","sonarReport":{"id":9,"bugs":2,"vulnerabilities":1,"codeSmells":2,"coverage":null,"duplication":null},"trivyFindings":[],"owaspFindings":[]}

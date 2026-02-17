@@ -1,0 +1,50 @@
+{
+    "total": 5,
+    "issues": [
+        {
+            "key": "1",
+            "rule": "java:S3740",
+            "severity": "MAJOR",
+            "component": "test",
+            "type": "BUG",
+            "status": "OPEN",
+            "message": "Test bug 1"
+        },
+        {
+            "key": "2",
+            "rule": "java:S3740",
+            "severity": "MAJOR",
+            "component": "test",
+            "type": "BUG",
+            "status": "OPEN",
+            "message": "Test bug 2"
+        },
+        {
+            "key": "3",
+            "rule": "java:S1192",
+            "severity": "CRITICAL",
+            "component": "test",
+            "type": "CODE_SMELL",
+            "status": "OPEN",
+            "message": "Test smell"
+        },
+        {
+            "key": "4",
+            "rule": "java:S1192",
+            "severity": "CRITICAL",
+            "component": "test",
+            "type": "VULNERABILITY",
+            "status": "OPEN",
+            "message": "Test vuln"
+        },
+        {
+            "key": "5",
+            "rule": "java:S1192",
+            "severity": "CRITICAL",
+            "component": "test",
+            "type": "CODE_SMELL",
+            "status": "OPEN",
+            "message": "Test smell 2"
+        }
+    ]
+}

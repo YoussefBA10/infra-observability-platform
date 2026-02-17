@@ -7,10 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/reports")
 public class ReportController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ReportController.class);
 
     @Autowired
     private ReportService reportService;
@@ -29,6 +33,11 @@ public class ReportController {
             @RequestParam(value = "trivy", required = false) org.springframework.web.multipart.MultipartFile trivyFile,
             @RequestParam(value = "owasp", required = false) org.springframework.web.multipart.MultipartFile owaspFile
     ) throws java.io.IOException {
+        logger.info("Received report request for app: {}, version: {}, status: {}", app, appVersion, status);
+        logger.info("Multipart files received - Sonar: {} ({} bytes), Trivy: {} ({} bytes), OWASP: {} ({} bytes)", 
+                sonarFile != null ? sonarFile.getOriginalFilename() : "null", sonarFile != null ? sonarFile.getSize() : 0,
+                trivyFile != null ? trivyFile.getOriginalFilename() : "null", trivyFile != null ? trivyFile.getSize() : 0,
+                owaspFile != null ? owaspFile.getOriginalFilename() : "null", owaspFile != null ? owaspFile.getSize() : 0);
         ReportRequest request = new ReportRequest();
         request.setStatus(status);
         request.setDuration(duration);
